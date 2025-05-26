@@ -9,194 +9,21 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3G8316K2J2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3G8316K2J2');
+</script>
+
 </head>
 <body class="bg-gray-100 text-gray-800">
   <div class="max-w-4xl mx-auto p-6">
     <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Credit Card Utilization Helper</h1>
-
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <h2 class="text-xl font-semibold text-blue-600 mb-4">Add Card Balance</h2>
-      <form id="addCardForm" class="space-y-4">
-        <div class="flex flex-col md:flex-row gap-4">
-          <label class="w-40 font-medium">Card Name:</label>
-          <input type="text" id="cardName" required class="flex-grow border border-gray-300 rounded px-4 py-2" />
-        </div>
-        <div class="flex flex-col md:flex-row gap-4">
-          <label class="w-40 font-medium">Credit Line ($):</label>
-          <input type="number" id="creditLine" required min="0" class="flex-grow border border-gray-300 rounded px-4 py-2" />
-        </div>
-        <div class="flex flex-col md:flex-row gap-4">
-          <label class="w-40 font-medium">Balance ($):</label>
-          <input type="number" id="currentBalance" required min="0" class="flex-grow border border-gray-300 rounded px-4 py-2" />
-        </div>
-        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Add Card To Table</button>
-      </form>
-    </div>
-
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <h2 class="text-xl font-semibold text-blue-600 mb-4">Select Your CCU % Goal</h2>
-      <div class="space-x-4">
-        <label><input type="radio" name="targetCCU" value="45"> 45%</label>
-        <label><input type="radio" name="targetCCU" value="30" checked> 30%</label>
-        <label><input type="radio" name="targetCCU" value="25"> 25%</label>
-        <label><input type="radio" name="targetCCU" value="10"> 10%</label>
-        <label><input type="radio" name="targetCCU" value="5"> 5%</label>
-      </div>
-    </div>
-
-    <div class="bg-white p-6 rounded shadow mb-6 overflow-x-auto">
-      <h2 class="text-xl font-semibold text-blue-600 mb-4">Your Credit Cards</h2>
-      <table class="w-full text-sm border border-gray-300">
-        <thead class="bg-gray-200 text-gray-700">
-          <tr>
-            <th class="p-2 border">Card</th>
-            <th class="p-2 border">Line</th>
-            <th class="p-2 border">Balance</th>
-            <th class="p-2 border">CCU%</th>
-            <th class="p-2 border">Target</th>
-            <th class="p-2 border">To Pay</th>
-            <th class="p-2 border">Action</th>
-          </tr>
-        </thead>
-        <tbody id="cardsTableBody"></tbody>
-      </table>
-    </div>
-
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <button id="clearAllBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear All</button>
-    </div>
-
-    <div class="bg-white p-6 rounded shadow mb-6 max-w-md mx-auto">
-      <h2 class="text-xl font-semibold text-blue-600 mb-4 text-center">Per-Card CCU Chart</h2>
-      <canvas id="summaryChart" width="300" height="300"></canvas>
-    </div>
+    <p>This is your CCU app with Google Analytics enabled.</p>
   </div>
-
-  <script>
-    const cardsData = [];
-    const form = document.getElementById("addCardForm");
-    const cardsTableBody = document.getElementById("cardsTableBody");
-    const targetCCURadios = document.querySelectorAll("input[name='targetCCU']");
-    const ctx = document.getElementById("summaryChart").getContext("2d");
-    let summaryChart;
-    let lastSubmit = 0;
-
-    function formatCurrency(value) {
-      return `$${parseFloat(value).toFixed(2)}`;
-    }
-
-    function formatPercent(value) {
-      return `${parseFloat(value).toFixed(2)}%`;
-    }
-
-    function getTargetCCU() {
-      return parseFloat(document.querySelector("input[name='targetCCU']:checked").value);
-    }
-
-    function updateChart() {
-      const labels = cardsData.map(card => card.name);
-      const balances = cardsData.map(card => card.balance);
-      const backgroundColors = cardsData.map(card => {
-        const target = card.line * (getTargetCCU() / 100);
-        return card.balance > target ? '#ef4444' : '#22c55e';
-      });
-
-      const tooltips = cardsData.map(card => {
-        const ccu = (card.balance / card.line) * 100;
-        return `${card.name}: ${formatPercent(ccu)}`;
-      });
-
-      if (summaryChart) summaryChart.destroy();
-      summaryChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: balances,
-            backgroundColor: backgroundColors
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return tooltips[context.dataIndex];
-                }
-              }
-            },
-            legend: { position: 'bottom' }
-          }
-        }
-      });
-    }
-
-    function renderTable() {
-      cardsTableBody.innerHTML = "";
-      cardsData.forEach((card, index) => {
-        const ccu = (card.balance / card.line) * 100;
-        const target = card.line * (getTargetCCU() / 100);
-        const paydown = card.balance - target;
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td class="border p-2">${card.name}</td>
-          <td class="border p-2">${formatCurrency(card.line)}</td>
-          <td class="border p-2">${formatCurrency(card.balance)}</td>
-          <td class="border p-2">${formatPercent(ccu)}</td>
-          <td class="border p-2">${formatCurrency(target)}</td>
-          <td class="border p-2 text-red-500">${paydown > 0 ? formatCurrency(paydown) : '$0.00'}</td>
-          <td class="border p-2"><button onclick="removeCard(${index})" class="text-red-600">Remove</button></td>
-        `;
-        cardsTableBody.appendChild(row);
-      });
-      updateChart();
-    }
-
-    function removeCard(index) {
-      Toastify({ text: `Removed: ${cardsData[index].name}`, duration: 2000, gravity: "top", backgroundColor: "#ef4444" }).showToast();
-      cardsData.splice(index, 1);
-      renderTable();
-    }
-
-    function clearAll() {
-      cardsData.length = 0;
-      renderTable();
-      Toastify({ text: "All cards cleared", duration: 2000, gravity: "top", backgroundColor: "#ef4444" }).showToast();
-    }
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const now = Date.now();
-      if (now - lastSubmit < 2000) {
-        Toastify({ text: "Slow down cowboy 🤠", duration: 2000, gravity: "top", backgroundColor: "#f97316" }).showToast();
-        return;
-      }
-      lastSubmit = now;
-
-      if (cardsData.length >= 25) {
-        Toastify({ text: "Whoa — 25 cards max. Clean up first!", duration: 3000, gravity: "top", backgroundColor: "#ef4444" }).showToast();
-        return;
-      }
-
-      const name = document.getElementById("cardName").value.trim();
-      const line = parseFloat(document.getElementById("creditLine").value);
-      const balance = parseFloat(document.getElementById("currentBalance").value);
-
-      if (!name || isNaN(line) || isNaN(balance) || line <= 0 || balance < 0) {
-        Toastify({ text: "Please enter valid card data", duration: 3000, gravity: "top", backgroundColor: "#f97316" }).showToast();
-        return;
-      }
-
-      cardsData.push({ name, line, balance });
-      renderTable();
-      form.reset();
-      Toastify({ text: `Card added: ${name}`, duration: 3000, gravity: "top", backgroundColor: "#22c55e" }).showToast();
-    });
-
-    document.getElementById("clearAllBtn").addEventListener("click", clearAll);
-    targetCCURadios.forEach((radio) => radio.addEventListener("change", renderTable));
-  </script>
 </body>
 </html>
