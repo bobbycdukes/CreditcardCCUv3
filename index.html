@@ -70,9 +70,9 @@
       <button id="clearAllBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear All</button>
     </div>
 
-    <!-- Summary Doughnut Chart (Moved to bottom) -->
-    <div class="bg-white p-6 rounded shadow mb-6 max-w-sm mx-auto">
-      <h2 class="text-xl font-semibold text-blue-600 mb-4 text-center">Summary CCU Chart</h2>
+    <!-- Summary Doughnut Chart (Bottom) -->
+    <div class="bg-white p-6 rounded shadow mb-6 max-w-md mx-auto">
+      <h2 class="text-xl font-semibold text-blue-600 mb-4 text-center">Per-Card CCU Chart</h2>
       <canvas id="summaryChart" width="300" height="300"></canvas>
     </div>
   </div>
@@ -98,27 +98,39 @@
     }
 
     function updateChart() {
-      const totalBalance = cardsData.reduce((sum, card) => sum + card.balance, 0);
-      const totalLine = cardsData.reduce((sum, card) => sum + card.line, 0);
-      const targetBalance = totalLine * (getTargetCCU() / 100);
-      const withinTarget = Math.min(totalBalance, targetBalance);
-      const overTarget = Math.max(0, totalBalance - targetBalance);
+      const labels = cardsData.map(card => card.name);
+      const balances = cardsData.map(card => card.balance);
+      const backgroundColors = cardsData.map(card => {
+        const target = card.line * (getTargetCCU() / 100);
+        return card.balance > target ? '#ef4444' : '#22c55e';
+      });
 
-      const data = {
-        labels: ['Within Target', 'Over Target'],
-        datasets: [{
-          data: [withinTarget, overTarget],
-          backgroundColor: ['#22c55e', '#ef4444']
-        }]
-      };
+      const tooltips = cardsData.map(card => {
+        const ccu = (card.balance / card.line) * 100;
+        return `${card.name}: ${formatPercent(ccu)}`;
+      });
 
       if (summaryChart) summaryChart.destroy();
       summaryChart = new Chart(ctx, {
         type: 'doughnut',
-        data,
+        data: {
+          labels: labels,
+          datasets: [{
+            data: balances,
+            backgroundColor: backgroundColors
+          }]
+        },
         options: {
           responsive: true,
           plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const index = context.dataIndex;
+                  return tooltips[index];
+                }
+              }
+            },
             legend: { position: 'bottom' }
           }
         }
