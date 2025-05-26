@@ -15,22 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-      id-token: write
       contents: read
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
           lfs: false
-
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
-        with:
-          script: |
-            const core = require('@actions/core');
-            return await core.getIDToken();
-          result-encoding: string
 
       - name: Deploy Static HTML to Azure
         id: builddeploy
@@ -41,7 +31,6 @@ jobs:
           app_location: "/"            # Root of your project
           output_location: "/"         # No build step, just serve root files
           api_location: ""             # No backend
-          github_id_token: ${{ steps.idtoken.outputs.result }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
