@@ -14,13 +14,7 @@
   <div class="max-w-4xl mx-auto p-6">
     <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Credit Card Utilization Helper</h1>
 
-    <!-- Doughnut Summary Chart -->
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <h2 class="text-xl font-semibold text-blue-600 mb-4">Summary CCU Chart</h2>
-      <canvas id="summaryChart"></canvas>
-    </div>
-
-    <!-- Form and Radio Controls -->
+    <!-- Form Section -->
     <div class="bg-white p-6 rounded shadow mb-6">
       <h2 class="text-xl font-semibold text-blue-600 mb-4">Add Card Balance</h2>
       <form id="addCardForm" class="space-y-4">
@@ -40,6 +34,7 @@
       </form>
     </div>
 
+    <!-- Target CCU Selection -->
     <div class="bg-white p-6 rounded shadow mb-6">
       <h2 class="text-xl font-semibold text-blue-600 mb-4">Select Your CCU % Goal</h2>
       <div class="space-x-4">
@@ -51,7 +46,7 @@
       </div>
     </div>
 
-    <!-- Table Section -->
+    <!-- Table Overview -->
     <div class="bg-white p-6 rounded shadow mb-6 overflow-x-auto">
       <h2 class="text-xl font-semibold text-blue-600 mb-4">Your Credit Cards</h2>
       <table class="w-full text-sm border border-gray-300">
@@ -70,8 +65,15 @@
       </table>
     </div>
 
-    <div class="bg-white p-6 rounded shadow">
+    <!-- Clear Button -->
+    <div class="bg-white p-6 rounded shadow mb-6">
       <button id="clearAllBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear All</button>
+    </div>
+
+    <!-- Summary Doughnut Chart (Moved to bottom) -->
+    <div class="bg-white p-6 rounded shadow mb-6 max-w-sm mx-auto">
+      <h2 class="text-xl font-semibold text-blue-600 mb-4 text-center">Summary CCU Chart</h2>
+      <canvas id="summaryChart" width="300" height="300"></canvas>
     </div>
   </div>
 
