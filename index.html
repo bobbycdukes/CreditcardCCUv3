@@ -14,6 +14,13 @@
   <div class="max-w-4xl mx-auto p-6">
     <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Credit Card Utilization Helper</h1>
 
+    <!-- Doughnut Summary Chart -->
+    <div class="bg-white p-6 rounded shadow mb-6">
+      <h2 class="text-xl font-semibold text-blue-600 mb-4">Summary CCU Chart</h2>
+      <canvas id="summaryChart"></canvas>
+    </div>
+
+    <!-- Form and Radio Controls -->
     <div class="bg-white p-6 rounded shadow mb-6">
       <h2 class="text-xl font-semibold text-blue-600 mb-4">Add Card Balance</h2>
       <form id="addCardForm" class="space-y-4">
@@ -44,10 +51,7 @@
       </div>
     </div>
 
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <button id="clearAllBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear All</button>
-    </div>
-
+    <!-- Table Section -->
     <div class="bg-white p-6 rounded shadow mb-6 overflow-x-auto">
       <h2 class="text-xl font-semibold text-blue-600 mb-4">Your Credit Cards</h2>
       <table class="w-full text-sm border border-gray-300">
@@ -67,8 +71,7 @@
     </div>
 
     <div class="bg-white p-6 rounded shadow">
-      <h2 class="text-xl font-semibold text-blue-600 mb-4">Utilization Chart</h2>
-      <canvas id="ccuChart"></canvas>
+      <button id="clearAllBtn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear All</button>
     </div>
   </div>
 
@@ -77,6 +80,8 @@
     const form = document.getElementById("addCardForm");
     const cardsTableBody = document.getElementById("cardsTableBody");
     const targetCCURadios = document.querySelectorAll("input[name='targetCCU']");
+    const ctx = document.getElementById("summaryChart").getContext("2d");
+    let summaryChart;
 
     function formatCurrency(value) {
       return `$${parseFloat(value).toFixed(2)}`;
@@ -88,6 +93,34 @@
 
     function getTargetCCU() {
       return parseFloat(document.querySelector("input[name='targetCCU']:checked").value);
+    }
+
+    function updateChart() {
+      const totalBalance = cardsData.reduce((sum, card) => sum + card.balance, 0);
+      const totalLine = cardsData.reduce((sum, card) => sum + card.line, 0);
+      const targetBalance = totalLine * (getTargetCCU() / 100);
+      const withinTarget = Math.min(totalBalance, targetBalance);
+      const overTarget = Math.max(0, totalBalance - targetBalance);
+
+      const data = {
+        labels: ['Within Target', 'Over Target'],
+        datasets: [{
+          data: [withinTarget, overTarget],
+          backgroundColor: ['#22c55e', '#ef4444']
+        }]
+      };
+
+      if (summaryChart) summaryChart.destroy();
+      summaryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
     }
 
     function renderTable() {
@@ -109,6 +142,7 @@
         `;
         cardsTableBody.appendChild(row);
       });
+      updateChart();
     }
 
     function removeCard(index) {
